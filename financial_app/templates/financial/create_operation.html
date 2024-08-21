@@ -1,0 +1,17 @@
+{% extends "financial/base.html" %}
+{% load static %}
+
+{% block body %}
+
+    <div class="container d-flex justify-content-center mt-5">
+        <div class="card-create">
+            <h3>Create an operation</h3>
+            <form action="{% url 'create_operation' %}" method="post">
+                {% csrf_token %}
+                {{ operation_form.as_p }}
+                <button class="btn btn-primary" type="submit">Submit</button>
+            </form>
+        </div>
+    </div>
+{% endblock %}
+

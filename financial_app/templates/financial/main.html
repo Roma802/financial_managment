@@ -1,0 +1,49 @@
+{% extends "financial/base.html" %}
+{% load static %}
+
+
+{% block body %}
+    {% if messages %}
+        <div class="multiline-container">
+            {% for message in messages %}
+            <div class="alert alert-danger" role="alert">
+                <p>{{ message }}</p>
+            </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+    {% if biggest_spending %}
+        <h4>The biggest expenses</h4>
+            <br>
+            {% for i in biggest_spending %}
+            <h6>{{ i.operation_category|default_if_none:'TOTAL' }}</h6>
+             <pre>   -{{i.amount_of_expenses}} {{currency}}                       {{i.created_at}}</pre>
+            <hr/>
+            {% if not forloop.last %}
+                <br>
+            {% endif %}
+            {% endfor %}
+
+    {% endif %}
+    <div id="chartContainerOne" style="height: 370px; width: 100%;"></div>
+    <br>
+    <h4>Recommendations</h4>
+    {% for i in analytical_data|slice:':3' %}
+        <p>{{ i.0|default_if_none:'TOTAL' }}: You should spend <b>{{ i.1 }} {{currency}}</b> per day</p>
+        <hr class="mt-2 mb-3"/>
+        {% if not forloop.last %}
+            <br>
+        {% endif %}
+    {% endfor %}
+    {% if analytical_data|length > 3 %}
+        <a class="btn btn-primary" href="{% url 'recommendations' %}">View more</a>
+    {% endif %}
+    <br><br>
+    <div id="chartContainerTwo" style="height: 370px; width: 100%;"></div>
+    <br>
+    <div id="chartContainerThree" style="height: 370px; width: 100%;"></div>
+    <script src="https://cdn.canvasjs.com/canvasjs.min.js"></script>
+    <script type="text/javascript" src="{% static 'financial_app/js/charts.js' %}"></script>
+<!--    <script type="text/javascript" src="{% static 'financial_app/js/saving.js' %}"></script>-->
+
+{% endblock %}

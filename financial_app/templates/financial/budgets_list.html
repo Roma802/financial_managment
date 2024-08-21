@@ -1,0 +1,58 @@
+{% extends "financial/base.html" %}
+{% load static %}
+
+{% block body %}
+
+    <h2>Your budgets</h2>
+<a class='button-create' href="{% url 'create_budget' %}">Create an budget</a>
+    <br>
+    {% for budget in object_list %}
+        <div class="post-wrapper">
+        <p><b>{{budget.budget_category|default_if_none:'TOTAL BUDGET'}}</b></p>
+            <p>{{currency}} {{budget.account}}</p>
+        <a href="{% url 'update_budget' budget.pk %}">
+            <button type="button" class="btn btn-dark">Update</button>
+        </a>
+        {% if budget.budget_category %}
+            <a href="{% url 'delete_budget' budget.pk %}">
+                <button type="button" class="btn btn-danger">Delete</button>
+            </a>
+        {% endif %}
+<!--        {% if budget == data.budget %}-->
+<!--                <p><b>You should spend {{ data.expenses_for_savings }} {{currency}} per day to save money</b></p>-->
+<!--        {% endif %}-->
+         <br><br>
+        <div class="parent">
+            <input type="submit" class="user-submit" value="Save money"><br>
+<!--            </div>-->
+            <div class="not-visible saving-form">
+                <form action="" method="post">
+                    {% csrf_token %}
+                    {{ savings_form.as_p }}
+                    <input type="hidden" id="budget_category" name="budget_category" value="{{ budget.budget_category }}">
+                    <button type="submit" class="saving-submit">Submit</button>
+                </form>
+            </div>
+            <br>
+            <div class="recommendations"></div>
+            <div class="saving-error"></div>
+         <br><br>
+        </div>
+        </div>
+    {% endfor %}
+    <nav class="paginate">
+        <ul>
+         {% if page_obj.has_previous %}
+            <li><a href="?page={{ page_obj.previous_page_number }}">previous</a></li>
+         {% endif %}
+            <li><a href="?page={{ page_obj.number }}">{{ page_obj.number }}</a></li>
+            {% if page_obj.has_next %}
+                <li><a href="?page={{ page_obj.next_page_number }}">next</a></li>
+            {% endif %}
+         </ul>
+    </nav>
+     <script type="text/javascript" src="{% static 'financial_app/js/saving.js' %}"></script>
+    <script type="text/javascript" src="{% static 'financial_app/js/saving-form.js' %}"></script>
+
+{% endblock %}
+

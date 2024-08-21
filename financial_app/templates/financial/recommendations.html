@@ -1,0 +1,12 @@
+{% extends "financial/base.html" %}
+{% load static %}
+
+{% block body %}
+    <h2>Recommendations</h2>
+    <br>
+    {% for i in analytical_data %}
+        <p>{{ i.0|default_if_none:'TOTAL' }}: You should spend <b>{{ i.1 }} {{currency}}</b> per day</p>
+        <hr class="mt-2 mb-3"/>
+        <br>
+    {% endfor %}
+{% endblock %}

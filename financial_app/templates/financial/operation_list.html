@@ -1,0 +1,27 @@
+{% extends "financial/base.html" %}
+{% load static %}
+
+{% block body %}
+    <h2>Your operations</h2>
+    <a class='button-create' href="{% url 'create_operation' %} ">Create an operation</a>
+    <br>
+    {% for operation in object_list %}
+        <h5>{{ operation.operation_category|default_if_none:'TOTAL' }}</h5>
+        <pre>-{{operation.amount_of_expenses}} {{currency}}                  {{operation.created_at}}</pre>
+        <hr class="mt-2 mb-3"/>
+        <br>
+    {% empty %}
+    <h5>You have no operations yet</h5>
+    {% endfor %}
+    <nav class="paginate">
+        <ul>
+         {% if page_obj.has_previous %}
+            <li><a href="?page={{ page_obj.previous_page_number }}">previous</a></li>
+         {% endif %}
+            <li><a href="?page={{ page_obj.number }}">{{ page_obj.number }}</a></li>
+            {% if page_obj.has_next %}
+                <li><a href="?page={{ page_obj.next_page_number }}">next</a></li>
+            {% endif %}
+         </ul>
+    </nav>
+{% endblock %}
