@@ -76,6 +76,7 @@ def register(request):
 def main(request):
     if request.user.is_authenticated:
         analytical_data, currency, user_profile = get_cache_data(request)
+        print("User IP Address: ", request.META['REMOTE_ADDR'])
         biggest_spending = Operation.objects.filter(user_profile=user_profile).only(
             'amount_of_expenses', 'operation_category', 'created_at').order_by('-amount_of_expenses')[:3]
         savings_form = SavingsForm()

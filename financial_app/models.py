@@ -36,7 +36,7 @@ class UserProfile(models.Model):
 
 
 class Budget(MPTTModel):
-    user_profile = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
+    user_profile = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name='budgets')
     created = models.DateTimeField(auto_now_add=True, db_index=True)
     account = models.DecimalField(max_digits=14, decimal_places=2, default=0.00)
     budget_category = models.CharField(max_length=256, choices=CATEGORIES_CHOICES, null=True, blank=True)

@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 import calendar
+import os
 from datetime import datetime
 from pathlib import Path
 from celery.schedules import crontab
@@ -20,16 +21,22 @@ from financial_managment.celery import app
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
-# Quick-start development settings - unsuitable for production
+# Quick-start development settings unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-f-8xu69=^v3gzp06xwim2ek=hbu=rv*q8c982(_f!h32%f5xu2'
+SECRET_KEY = os.getenv("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.environ.get("DEBUG", True)
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["127.0.0.1", 'localhost']
+
+if os.environ.get("ALLOWED_HOSTS") is not None:
+    try:
+        ALLOWED_HOSTS += os.environ.get("ALLOWED_HOSTS").split(",")
+    except Exception as e:
+        print("Cant set ALLOWED_HOSTS, using default instead")
 
 
 # Application definition
@@ -127,7 +134,11 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
+# STATICFILES_DIRS = (os.path.join(BASE_DIR, 'static'),)
+STATIC_ROOT = os.path.join(BASE_DIR, "static")
+# MEDIA_URL = "/mediafiles/"
+# MEDIA_ROOT = os.path.join(BASE_DIR, "mediafiles")
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
@@ -136,12 +147,16 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
 CELERY_RESULT_BACKEND = 'django-db'
-CELERY_BROKER_URL = 'redis://127.0.0.1:6379/0'
+# CELERY_BROKER_URL = 'redis://127.0.0.1:6379/0'
+# celery_redis_url = os.getenv("BROKER_URL", "redis://127.0.0.1:6379/0")
+# CELERY_BROKER_URL = os.environ.get("BROKER_URL", "redis://127.0.0.1:6379/0")
+CELERY_BROKER_URL = os.getenv("BROKER_URL", "redis://127.0.0.1:6379/0")
 
 app.conf.beat_schedule = {
     'update_budgets-begin-of-month': {
         'task': 'financial_app.tasks.update_budgets',
-        'schedule': crontab(hour='0', minute='1', day_of_month='1'),
+        # 'schedule': crontab(hour='0', minute='1', day_of_month='1'),
+        'schedule': crontab(hour='13', minute='45', day_of_month='7'),
     },
 }
 app.conf.timezone = 'UTC'
@@ -149,13 +164,19 @@ app.conf.timezone = 'UTC'
 INTERNAL_IPS = [
     # ...
     "127.0.0.1",
-    # ...
+    # "172.18.0.1",
 ]
+
+DEBUG_TOOLBAR_CONFIG = {
+    'SHOW_TOOLBAR_CALLBACK': lambda request: bool(request.headers.get('x-requested-with') != 'XMLHttpRequest'),
+}
+
+caches_redis_url = os.getenv("CACHES_LOCATION", "redis://127.0.0.1:6379")
 
 CACHES = {
     "default": {
         "BACKEND": "django.core.cache.backends.redis.RedisCache",
-        "LOCATION": "redis://127.0.0.1:6379",
+        "LOCATION": caches_redis_url,
         "OPTIONS": {
             'db': '1',
         }
@@ -163,5 +184,5 @@ CACHES = {
 }
 
 ANALYTICAL_CACHE_NAME = 'analytical_cache'
-API_KEY = 'f6507751e405811c5c6e915f57406bff'
+API_KEY = os.getenv("API_KEY")
 BASE_URL = 'http://api.exchangeratesapi.io/v1/'

@@ -1,0 +1,68 @@
+services:
+  web-app:
+    build:
+        context: .  # папка, в которой находится Dockerfile
+        dockerfile: Dockerfile.prod
+    command: gunicorn financial_managment.wsgi:application --bind 0.0.0.0:8000
+    volumes:
+      - ./financial_app:/financial_app
+      # - ./db.sqlite3:/db.sqlite3
+      # - db-data:/db.sqlite3
+      - db-data:/financial_managment
+      - static_volume:/home/web-app/app/staticfiles
+      - media_volume:/home/web-app/app/mediafiles
+    ports:
+      - 8000:8000
+    env_file:
+      - .env.dev
+    depends_on:
+      - redis
+
+  celery:
+    build:
+      context: .
+    command: celery -A financial_managment worker -l info -P solo
+    volumes:
+      - ./financial_app:/financial_app
+      - db-data:/financial_managment
+    env_file:
+      - .env.dev
+    depends_on:
+      - web-app
+      - redis
+
+  celery-beat:
+    build:
+      context: .
+    command: celery -A financial_managment beat -l info --scheduler django_celery_beat.schedulers:DatabaseScheduler
+    volumes:
+      - ./financial_app:/financial_app
+      - db-data:/financial_managment
+    env_file:
+      - .env.dev
+    depends_on:
+      - web-app
+      - redis
+
+  redis:
+    image: redis:alpine  # Use the lightweight Redis image
+    ports:
+      - 6379:6379
+
+  nginx:
+    build:
+      context: ./nginx
+    volumes:
+      - static_volume:/home/web-app/app/staticfiles
+      - media_volume:/home/web-app/app/mediafiles
+    ports:
+      - 1337:80
+    depends_on:
+      - web-app
+
+
+volumes:
+  db-data:
+  static_volume:
+  media_volume:
+
