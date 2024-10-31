@@ -155,8 +155,7 @@ CELERY_BROKER_URL = os.getenv("BROKER_URL", "redis://127.0.0.1:6379/0")
 app.conf.beat_schedule = {
     'update_budgets-begin-of-month': {
         'task': 'financial_app.tasks.update_budgets',
-        # 'schedule': crontab(hour='0', minute='1', day_of_month='1'),
-        'schedule': crontab(hour='13', minute='45', day_of_month='7'),
+        'schedule': crontab(hour='0', minute='1', day_of_month='1'),
     },
 }
 app.conf.timezone = 'UTC'
